@@ -3,14 +3,15 @@ ARG NODE_VERSION="18-alpine"
 
 FROM $DOCKER_HUB/library/node:$NODE_VERSION AS build
 
-COPY . /workspace/
+WORKDIR /workspace
+
+COPY . .
 
 ARG NPM_REGISTRY="https://registry.npmjs.org"
 
-RUN echo "registry = \"$NPM_REGISTRY\"" > /workspace/.npmrc \
-    && cd /workspace/ \
+RUN echo "registry = \"$NPM_REGISTRY\"" > .npmrc \
     && npm install \
-    && npm run build -- --configuration production
+    && node --max-old-space-size=2048 ./node_modules/.bin/ng build --configuration production
 
 FROM $DOCKER_HUB/library/nginx:stable-alpine AS runtime
 
